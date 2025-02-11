@@ -1,5 +1,6 @@
 package com.example.springboot_asnmt2.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -26,6 +27,7 @@ public class Employee {
     private String department;
 
     @ManyToMany
+//    @JsonManagedReference
     private List<SkillSet> skills;
 
     @ManyToMany
