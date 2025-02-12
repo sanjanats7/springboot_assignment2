@@ -10,7 +10,10 @@ import com.example.springboot_asnmt2.repository.EmployeeRepository;
 import com.example.springboot_asnmt2.repository.ProjectRepository;
 import com.example.springboot_asnmt2.repository.SkillSetRepository;
 import com.example.springboot_asnmt2.repository.EmployerRepository;
+import jakarta.persistence.Cacheable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -31,7 +34,7 @@ public class EmployeeService {
 
     @Autowired
     private EmployerRepository employerRepository;
-
+    @CacheEvict(value = "employees", allEntries = true)
     public Employee addEmployee(EmployeeDTO employeeDTO) {
         Employer employer = employerRepository.findById(employeeDTO.getEmployerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employer not found"));
@@ -50,7 +53,7 @@ public class EmployeeService {
         employee.setProjects(projects);
         return employeeRepository.save(employee);
     }
-
+    @CachePut(value = "employees", key = "#employeeId")
     public Employee updateEmployee(Long employeeId, EmployeeDTO employeeDTO) {
         Optional<Employee> optionalEmployee = employeeRepository.findById(employeeId);
         if (optionalEmployee.isPresent()) {
@@ -73,15 +76,15 @@ public class EmployeeService {
         }
         throw new ResourceNotFoundException("Employee not found");
     }
-
+    @CacheEvict(value = "employees", key = "#employeeId")
     public void removeEmployee(Long employeeId) {
         employeeRepository.deleteById(employeeId);
     }
-
+    @Cacheable(value = "employees")
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
-
+    @Cacheable(value = "employees", key = "#employeeId")
     public Employee getEmployee(Long employeeId) {
         return employeeRepository.findById(employeeId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
     }
